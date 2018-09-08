@@ -2,7 +2,11 @@
 #include <EEPROM.h>
 #define USE_SERIAL Serial
 #include <ESP8266WiFi.h>
+#include "ThingSpeak.h"
 #include <ESP8266HTTPClient.h>
+
+// Valve Control
+#define Valve D1
 
 // Variable init
 int addr = 0;
@@ -19,14 +23,27 @@ float calibrationFactor = 4.5;
 unsigned long totalMilliLitres;
 
 
+//int lastButtonState = 0;
+//int buttonState = 0;
+
+
 const char * ssid = "PY_LIN_";
 const char * password = "ironman10";
 
 //  Enter your Write API key from ThingSpeak
-String apiKey = "P78Q5MQS1WZJ3DML";
+String apiKey = "12J4A6HIAJGAYVIJ";
 
 // Thingsspeak server id
 const char* server = "api.thingspeak.com";
+
+int status = WL_IDLE_STATUS;
+
+// variable to save channel field reading
+int readValue;
+
+// modify this with your own Channel Number
+unsigned long myChannelNumber = 569034;
+const char * myReadAPIKey = "5H218WOV9MLD1ZAH";
 
 //HTTP client init
 HTTPClient http;
@@ -37,10 +54,13 @@ void setup() {
   Serial.begin(115200); // Start the Serial communication to send messages to the computer
   delay(10);
   Serial.println('\n');
+  ThingSpeak.begin(client);
 
   startWIFI();
   pinMode(buttonPin, INPUT);
   pinMode(ledPin, OUTPUT);
+  pinMode(Valve, OUTPUT);
+  digitalWrite(Valve, LOW);
 
   pulseCount = 0;
   flowRate = 0.0;
@@ -57,57 +77,39 @@ void loop() {
   if (WiFi.status() == WL_CONNECTED && (millis() - oldTime) > 1000) // Only process counters once per second
   {
 
+    readValue = ThingSpeak.readIntField(myChannelNumber, 1, myReadAPIKey);
+    Serial.print("readValue = "); // debugging instrument
+    Serial.print(readValue);    // debugging instrument
 
-    // Disable the interrupt while calculating flow rate and sending the value to
-    // the host
+    if ( readValue == 1)
+    {
+      digitalWrite(Valve, HIGH); // please notice if you need to modify this to LOW
+      //  if your board's port active low
+    }
+    else
+    {
+      digitalWrite(Valve, LOW); // please notice if you need to modify this to HIGH
+      //  if your board's port active low
+    }
+
+
     detachInterrupt(sensorInterrupt);
-
-    // Because this loop may not complete in exactly 1 second intervals we calculate
-    // the number of milliseconds that have passed since the last execution and use
-    // that to scale the output. We also apply the calibrationFactor to scale the output
-    // based on the number of pulses per second per units of measure (litres/minute in
-    // this case) coming from the sensor.
     flowRate = ((1000.0 / (millis() - oldTime)) * pulseCount) / calibrationFactor;
-
-    // Note the time this processing pass was executed. Note that because we've
-    // disabled interrupts the millis() function won't actually be incrementing right
-    // at this point, but it will still return the value it was set to just before
-    // interrupts went away.
     oldTime = millis();
-
-    // Divide the flow rate in litres/minute by 60 to determine how many litres have
-    // passed through the sensor in this 1 second interval, then multiply by 1000 to
-    // convert to millilitres.
     flowMilliLitres = (flowRate / 60) * 1000;
-
-    // Add the millilitres passed in this second to the cumulative total
     totalMilliLitres += flowMilliLitres;
-
     unsigned int frac;
 
-    // Print the flow rate for this second in litres / minute
-    Serial.print("Flow rate: ");
-    Serial.print(int(flowRate)); // Print the integer part of the variable
-    Serial.print("."); // Print the decimal point
-    // Determine the fractional part. The 10 multiplier gives us 1 decimal place.
+
     frac = (flowRate - int(flowRate)) * 10;
-    Serial.print(frac, DEC); // Print the fractional part of the variable
-    Serial.print("L/min");
-    // Print the number of litres flowed in this second
-    Serial.print("  Current Liquid Flowing: "); // Output separator
-    Serial.print(flowMilliLitres);
-    Serial.print("mL/Sec");
 
-    // Print the cumulative total of litres flowed since starting
-    Serial.print("  Output Liquid Quantity: "); // Output separator
-    Serial.print(totalMilliLitres);
-    Serial.println("mL");
-    //String FLowData = flowRate + Sep1 + flowMilliLitres + Sep1 + totalMilliLitres;
-    //Serial.println(FLowData);
 
-    if (flowRate > 0)
-    {
-      if (client.connect(server, 80))  //   "184.106.153.149" or api.thingspeak.com
+//    buttonState = digitalRead(Valve);
+
+    //if (buttonState != lastButtonState){
+      if (flowRate > 0 )
+      {
+      if (client.connect(server, 80))
       {
 
         String postStr = apiKey;
@@ -117,6 +119,8 @@ void loop() {
         postStr += String(flowMilliLitres);
         postStr += "&field3=";
         postStr += String(totalMilliLitres);
+        postStr += "&field4=";
+        postStr += String(readValue);
         postStr += "\r\n\r\n";
 
         client.print("POST /update HTTP/1.1\n");
@@ -135,14 +139,16 @@ void loop() {
         Serial.print(flowMilliLitres);
         Serial.print(" totalMilliLitres : ");
         Serial.print(totalMilliLitres);
+        Serial.print(" Valve Status : ");
+        Serial.print(readValue);
         Serial.println("%. Send to Thingspeak.");
       }
-      client.stop();
+    client.stop();
 
-      Serial.println("Waiting...");
+    Serial.println("Waiting...");
 
-      // thingspeak needs minimum 15 sec delay between updates, i've set it to 30 seconds
-      delay(8000);
+    // thingspeak needs minimum 15 sec delay between updates, i've set it to 30 seconds
+    delay(8000);
 
     }
 
