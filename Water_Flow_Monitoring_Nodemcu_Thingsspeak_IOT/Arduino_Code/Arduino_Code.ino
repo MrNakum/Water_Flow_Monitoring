@@ -1,3 +1,4 @@
+// import all libraries
 #include <Arduino.h>
 #include <EEPROM.h>
 #define USE_SERIAL Serial
@@ -26,7 +27,7 @@ unsigned long totalMilliLitres;
 //int lastButtonState = 0;
 //int buttonState = 0;
 
-
+// router detail
 const char * ssid = "PY_LIN_";
 const char * password = "ironman10";
 
@@ -36,6 +37,7 @@ String apiKey = "12J4A6HIAJGAYVIJ";
 // Thingsspeak server id
 const char* server = "api.thingspeak.com";
 
+
 int status = WL_IDLE_STATUS;
 
 // variable to save channel field reading
@@ -44,9 +46,6 @@ int readValue;
 // modify this with your own Channel Number
 unsigned long myChannelNumber = 569034;
 const char * myReadAPIKey = "5H218WOV9MLD1ZAH";
-
-//HTTP client init
-HTTPClient http;
 
 WiFiClient client;
 
@@ -78,8 +77,6 @@ void loop() {
   {
 
     readValue = ThingSpeak.readIntField(myChannelNumber, 1, myReadAPIKey);
-    Serial.print("readValue = "); // debugging instrument
-    Serial.print(readValue);    // debugging instrument
 
     if ( readValue == 1)
     {
@@ -103,12 +100,19 @@ void loop() {
 
     frac = (flowRate - int(flowRate)) * 10;
 
-
-//    buttonState = digitalRead(Valve);
+    Serial.print(" flowRate : ");
+    Serial.print(flowRate);
+    Serial.print(" flowMilliLitres : ");
+    Serial.print(flowMilliLitres);
+    Serial.print(" totalMilliLitres : ");
+    Serial.print(totalMilliLitres);
+    Serial.print(" Valve Status : ");
+    Serial.println(readValue);
+    //    buttonState = digitalRead(Valve);
 
     //if (buttonState != lastButtonState){
-      if (flowRate > 0 )
-      {
+    if (flowRate > 0 )
+    {
       if (client.connect(server, 80))
       {
 
@@ -133,24 +137,18 @@ void loop() {
         client.print("\n\n");
         client.print(postStr);
 
-        Serial.print(" flowRate : ");
-        Serial.print(flowRate);
-        Serial.print(" flowMilliLitres : ");
-        Serial.print(flowMilliLitres);
-        Serial.print(" totalMilliLitres : ");
-        Serial.print(totalMilliLitres);
-        Serial.print(" Valve Status : ");
-        Serial.print(readValue);
+
         Serial.println("%. Send to Thingspeak.");
       }
-    client.stop();
+      client.stop();
 
-    Serial.println("Waiting...");
+      Serial.println("Waiting...");
 
-    // thingspeak needs minimum 15 sec delay between updates, i've set it to 30 seconds
-    delay(8000);
+      // thingspeak needs minimum 15 sec delay between updates, i've set it to 30 seconds
+      delay(8000);
 
     }
+
 
     pulseCount = 0;
 
