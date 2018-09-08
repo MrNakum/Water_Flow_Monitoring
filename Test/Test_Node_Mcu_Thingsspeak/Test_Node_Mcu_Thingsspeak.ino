@@ -1,8 +1,6 @@
 /* 
 
-Script to test the nodemcu and thingsspeak,
-Nodemcu will upload data on thingsspeak cloud,
-in two different field.
+Script to write nodemcu sensor data into thingsspeak cloud
 
 */
 
