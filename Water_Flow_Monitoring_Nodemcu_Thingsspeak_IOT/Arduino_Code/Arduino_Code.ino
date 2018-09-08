@@ -27,11 +27,11 @@ const char * ssid = "PY_LIN_";
 const char * password = "ironman10";
 
 //  Enter your Write API key from ThingSpeak
-String apiKey = "12J4A6HIAJGAYVIJ";
+String apiKey = "FVBTQ81DD3BUTZL5";
 
 // modify this with your own Channel Number
 unsigned long myChannelNumber = 569034;
-const char * myReadAPIKey = "MZ27W4SM5T56V0BT";
+const char * myReadAPIKey = "5H218WOV9MLD1ZAH";
 
 // Thingsspeak server id
 const char* server = "api.thingspeak.com";
