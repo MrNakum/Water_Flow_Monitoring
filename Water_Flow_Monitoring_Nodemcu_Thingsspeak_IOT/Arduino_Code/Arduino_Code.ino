@@ -15,37 +15,36 @@ float flowRate;
 String Sep1 = ",";
 char push_data[200];
 unsigned long oldTime;
-const int ledPin = D7;
 volatile byte pulseCount;
 const int buttonPin = D2;
 byte sensorInterrupt = 0;
 unsigned int flowMilliLitres;
 float calibrationFactor = 4.5;
-unsigned long totalMilliLitres;
-
-
-//int lastButtonState = 0;
-//int buttonState = 0;
+float totalMilliLitres;
 
 // router detail
 const char * ssid = "PY_LIN_";
 const char * password = "ironman10";
 
 //  Enter your Write API key from ThingSpeak
-String apiKey = "12J4A6HIAJGAYVIJ";
+//  API contain flow data 
+unsigned long myWriteChannelNumber = 571234;
+const char * myWriteAPIKey = "12J4A6HIAJGAYVIJ";
+
+
+//  Enter your Read API key from ThingSpeak
+//  API contain vlave on and off status 
+unsigned long myReadChannelNumber = 571676;
+const char * myReadAPIKey = "MZ27W4SM5T56V0BT";
 
 // Thingsspeak server id
 const char* server = "api.thingspeak.com";
-
 
 int status = WL_IDLE_STATUS;
 
 // variable to save channel field reading
 int readValue;
 
-// modify this with your own Channel Number
-unsigned long myChannelNumber = 569034;
-const char * myReadAPIKey = "5H218WOV9MLD1ZAH";
 
 WiFiClient client;
 
@@ -57,7 +56,6 @@ void setup() {
 
   startWIFI();
   pinMode(buttonPin, INPUT);
-  pinMode(ledPin, OUTPUT);
   pinMode(Valve, OUTPUT);
   digitalWrite(Valve, LOW);
 
@@ -76,7 +74,7 @@ void loop() {
   if (WiFi.status() == WL_CONNECTED && (millis() - oldTime) > 1000) // Only process counters once per second
   {
 
-    readValue = ThingSpeak.readIntField(myChannelNumber, 1, myReadAPIKey);
+    readValue = ThingSpeak.readIntField(myReadChannelNumber, 1, myReadAPIKey);
 
     if ( readValue == 1)
     {
@@ -91,52 +89,57 @@ void loop() {
 
 
     detachInterrupt(sensorInterrupt);
-    flowRate = ((1000.0 / (millis() - oldTime)) * pulseCount) / calibrationFactor;
+    float flowRate = ((1000.0 / (millis() - oldTime)) * pulseCount) / calibrationFactor;
     oldTime = millis();
-    flowMilliLitres = (flowRate / 60) * 1000;
+    int flowMilliLitres = (flowRate / 60) * 1000;
     totalMilliLitres += flowMilliLitres;
     unsigned int frac;
 
 
     frac = (flowRate - int(flowRate)) * 10;
 
-    Serial.print(" flowRate : ");
-    Serial.print(flowRate);
-    Serial.print(" flowMilliLitres : ");
-    Serial.print(flowMilliLitres);
-    Serial.print(" totalMilliLitres : ");
-    Serial.print(totalMilliLitres);
-    Serial.print(" Valve Status : ");
+    Serial.print("flowRate : ");
+    Serial.println(flowRate);
+    Serial.print("flowMilliLitres : ");
+    Serial.println(flowMilliLitres);
+    Serial.print("totalMilliLitres : ");
+    Serial.println(totalMilliLitres);
+    Serial.print("Valve Status : ");
     Serial.println(readValue);
-    //    buttonState = digitalRead(Valve);
+    Serial.println("");
 
-    //if (buttonState != lastButtonState){
     if (flowRate > 0 )
     {
       if (client.connect(server, 80))
       {
 
-        String postStr = apiKey;
-        postStr += "&field1=";
-        postStr += String(flowRate);
-        postStr += "&field2=";
-        postStr += String(flowMilliLitres);
-        postStr += "&field3=";
-        postStr += String(totalMilliLitres);
-        postStr += "&field4=";
-        postStr += String(readValue);
-        postStr += "\r\n\r\n";
+//        String postStr = apiKey;
+//        postStr += "&field1=";
+//        postStr += String(flowRate);
+//        postStr += "&field2=";
+//        postStr += String(flowMilliLitres);
+//        postStr += "&field3=";
+//        postStr += String(totalMilliLitres);
+//        postStr += "&field4=";
+//        postStr += String(readValue);
+//        postStr += "\r\n\r\n";
 
-        client.print("POST /update HTTP/1.1\n");
-        client.print("Host: api.thingspeak.com\n");
-        client.print("Connection: close\n");
-        client.print("X-THINGSPEAKAPIKEY: " + apiKey + "\n");
-        client.print("Content-Type: application/x-www-form-urlencoded\n");
-        client.print("Content-Length: ");
-        client.print(postStr.length());
-        client.print("\n\n");
-        client.print(postStr);
-
+        
+        ThingSpeak.writeField(myWriteChannelNumber, 1, flowRate, myWriteAPIKey);
+        ThingSpeak.writeField(myWriteChannelNumber, 2, flowMilliLitres, myWriteAPIKey);
+        ThingSpeak.writeField(571234, 3, totalMilliLitres, "12J4A6HIAJGAYVIJ");
+        ThingSpeak.writeField(myWriteChannelNumber, 4, readValue, myWriteAPIKey);
+        
+//        client.print("POST /update HTTP/1.1\n");
+//        client.print("Host: api.thingspeak.com\n");
+//        client.print("Connection: close\n");
+//        client.print("X-THINGSPEAKAPIKEY: " + apiKey + "\n");
+//        client.print("Content-Type: application/x-www-form-urlencoded\n");
+//        client.print("Content-Length: ");
+//        client.print(postStr.length());
+//        client.print("\n\n");
+//        client.print(postStr);
+//
 
         Serial.println("%. Send to Thingspeak.");
       }
