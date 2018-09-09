@@ -18,5 +18,7 @@ Hardware used for this project:
 
 https://github.com/MrNakum/Water_Flow_Monitoring/tree/master/Water_Flow_Monitoring_Nodemcu_Thingsspeak_IOT/Connection_Diagram
 
-![](https://github.com/MrNakum/Water_Flow_Monitoring/tree/master/Water_Flow_Monitoring_Nodemcu_Thingsspeak_IOT/Connection_Diagram/Connection_Diagram.png "Connection Diagram")
+![](https://github.com/MrNakum/Water_Flow_Monitoring/blob/master/Water_Flow_Monitoring_Nodemcu_Thingsspeak_IOT/Connection_Diagram/Connection_Diagram.png "Connection Diagram")
+
+
 ![](https://github.com/MrNakum/RGB_Color_Detection_and_tracking/blob/master/Images/img1.jpeg "Panel Tilt mechanism")
