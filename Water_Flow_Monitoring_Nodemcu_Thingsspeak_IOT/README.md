@@ -15,6 +15,7 @@ Hardware used for this project:
 3) LED Lights.
 4) DC12V Plastic Electric 12V Water Solenoid Valve.
 5) Router or Mobile Hotspot for internet conenction.
+6) Singe Channel Realy Module.
 
 ![](https://github.com/MrNakum/Water_Flow_Monitoring/blob/master/Water_Flow_Monitoring_Nodemcu_Thingsspeak_IOT/Connection_Diagram/Connection_Diagram.png "Connection Diagram")
 
