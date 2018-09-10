@@ -1,3 +1,15 @@
+/*
+
+Author : Sanjay Prajapati , Nakum Urvish
+Date   : 8th Sept 2018
+
+Arduino Code to sense the sensor data and send that data on the thingsspeak cloud
+even it will read the data from thingsspeak channel and write the output of arduino
+as per our requirments.
+
+*/
+
+
 // import all libraries
 #include <Arduino.h>
 #include <EEPROM.h>
@@ -27,11 +39,11 @@ const char * ssid = "PY_LIN_";
 const char * password = "ironman10";
 
 //  Enter your Write API key from ThingSpeak
-String apiKey = "FVBTQ81DD3BUTZL5";
+String apiKey = "";
 
 // modify this with your own Channel Number
-unsigned long myChannelNumber = 569034;
-const char * myReadAPIKey = "5H218WOV9MLD1ZAH";
+unsigned long myChannelNumber = ;
+const char * myReadAPIKey = "";
 
 // Thingsspeak server id
 const char* server = "api.thingspeak.com";
@@ -145,6 +157,7 @@ void loop() {
     startWIFI();
   }
 }
+
 
 
 
