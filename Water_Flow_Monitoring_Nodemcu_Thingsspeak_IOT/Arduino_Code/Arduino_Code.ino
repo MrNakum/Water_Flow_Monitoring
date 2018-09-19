@@ -1,11 +1,11 @@
 /*
 
-Author : Sanjay Prajapati , Nakum Urvish
-Date   : 8th Sept 2018
+  Author : Sanjay Prajapati , Nakum Urvish
+  Date   : 8th Sept 2018
 
-Arduino Code to sense the sensor data and send that data on the thingsspeak cloud
-even it will read the data from thingsspeak channel and write the output of arduino
-as per our requirments.
+  Arduino Code to sense the sensor data and send that data on the thingsspeak cloud
+  even it will read the data from thingsspeak channel and write the output of arduino
+  as per our requirments.
 
 */
 
@@ -19,7 +19,7 @@ as per our requirments.
 #include <ESP8266HTTPClient.h>
 
 // Valve Control
-#define Valve D1
+#define Valve D5
 
 // Variable init
 int addr = 0;
@@ -39,11 +39,11 @@ const char * ssid = "PY_LIN_";
 const char * password = "ironman10";
 
 //  Enter your Write API key from ThingSpeak
-String apiKey = "";
+String apiKey = "FVBTQ81DD3BUTZL5";
 
 // modify this with your own Channel Number
-unsigned long myChannelNumber = ;
-const char * myReadAPIKey = "";
+unsigned long myChannelNumber = 569034;
+const char * myReadAPIKey = "5H218WOV9MLD1ZAH";
 
 // Thingsspeak server id
 const char* server = "api.thingspeak.com";
@@ -85,12 +85,16 @@ void loop() {
 
     if ( readValue == 1)
     {
-      digitalWrite(Valve, HIGH); // please notice if you need to modify this to LOW
+      digitalWrite(Valve, HIGH);
+      //Serial.print(digitalRead(Valve));
+      // please notice if you need to modify this to LOW
+      Serial.print("HIGH");
       //  if your board's port active low
     }
     else
     {
       digitalWrite(Valve, LOW); // please notice if you need to modify this to HIGH
+      Serial.print("LOW");
       //  if your board's port active low
     }
 
@@ -112,7 +116,7 @@ void loop() {
     Serial.print(totalMilliLitres);
     Serial.print(" Valve Status : ");
     Serial.println(readValue);
-    
+
     if (flowRate > 0 )
     {
       if (client.connect(server, 80))
